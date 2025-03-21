@@ -1,0 +1,19 @@
+Making our custom error class which extends to the original Error class,, what we are doing here is
+just formatting our errors so that we don't have to repeat this all over our files.
+
+ Benefits of Using a Custom Error Class:
+
+ Standardized Error Handling:
+ Enforces consistent error handling practices throughout the application.
+ Provides a clear structure for error objects.
+
+ Improved Error Messages:
+ Allows for more informative error messages, including HTTP status codes and custom messages.
+
+ Enhanced Debugging:
+ Stack traces help pinpoint the origin of errors.
+ Operational flag aids in distinguishing between recoverable and critical errors.
+
+ Simplified Error Handling:
+ Centralized error handling can reduce boilerplate code.
+ Custom error objects can be easily thrown and caught.

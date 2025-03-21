@@ -1,0 +1,20 @@
+When to Use APIFeatures??
+The APIFeatures class is ideal for:
+Basic filtering, sorting, pagination, and field selection based on req.query.
+Example URL:
+/api/v1/tours?page=2&sort=price&limit=5&fields=name,duration,price&difficulty=easy
+This URL would result in:
+Tour.find({ difficulty: 'easy' })
+  .sort('price')
+  .select('name duration price')
+  .skip(5)
+  .limit(5);
+
+When to Use Aggregation Pipelines??
+Use aggregation pipelines when:
+You need statistical operations:
+getTourStats calculates averages, minimums, and maximums using $avg, $min, and $max.
+You need to work with arrays:
+getMonthlyPlan uses $unwind to handle array fields like startDates.
+You require reshaping or transforming data:
+Adding computed fields ($addFields), renaming fields, or removing fields ($project).

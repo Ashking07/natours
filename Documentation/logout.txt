@@ -1,0 +1,8 @@
+This is so cool, first in index.js we are telling browser to check if there exists 
+a logout button, if so then execute logout function when it is clicked, then in the 
+logout function in login.js, we are sending a GET request to the api on 
+route "http://127.0.0.1:3000/api/v1/users/logout", which will trigger logout function 
+in authController.js from userRoute.js. Now in the authController.js in logout function we 
+are basically sending an invalid cookie token with the same name as jwt so it overrides the 
+original one, and sending the message as "success", now the logout function in login.js will 
+receive this 'success' message and reload our window hence making the new invalid cookie in work 

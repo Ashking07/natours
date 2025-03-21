@@ -1,0 +1,14 @@
+MongoDB Shell Connections (Local/Atlas)
+
+1. To Connect To The Local MongoDB
+- Start the local mongoDB server in terminal by executing 
+         -  mongod --dbpath ~/data/db
+- Then in another terminal tab execute 
+         - mongosh
+
+2. To Connect to the Cloud Deployed MongoDB Cluster instance 
+- Simply run 
+        - mongosh "mongodb+srv://cluster0.x3qnn.mongodb.net/" --apiVersion 1 --username ashwin
+
+- Or, go to the MongoDB atlas website, select your cluster and click “Connect”, there you’ll find many 
+options for connections, select SHELL

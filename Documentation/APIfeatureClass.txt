@@ -1,0 +1,63 @@
+Flow of Query Building via Chaining in APIFeatures Class
+
+filter():
+Filters documents based on query parameters.
+Converts advanced operators (e.g., gte, lte) into MongoDB-compatible syntax.
+Example:
+GET /api/v1/tours?price[gte]=500&difficulty=easy
+Query:
+Tour.find({ price: { $gte: 500 }, difficulty: 'easy' });
+
+sort():
+Dynamically sorts documents based on query parameters.
+Defaults to sorting by -createdAt if no sort parameter is provided.
+Example:
+GET /api/v1/tours?sort=price,-ratingsAverage
+Query:
+.sort('price -ratingsAverage');
+
+limitFields():
+Limits the fields included in the response, reducing payload size.
+Example:
+GET /api/v1/tours?fields=name,duration,price
+Query:
+.select('name duration price');
+
+paginate():
+Implements pagination with page and limit parameters.
+Defaults to page 1 and 100 results per page if not specified.
+Example:
+GET /api/v1/tours?page=2&limit=5
+Query:
+.skip(5).limit(5);
+
+
+Chaining Example
+
+Code:
+const features = new APIFeatures(Tour.find(), req.query)
+  .filter()
+  .sort()
+  .limitFields()
+  .paginate();
+
+const tours = await features.query;
+
+Request:
+GET /api/v1/tours?price[gte]=500&sort=price&fields=name,price&page=2&limit=5
+
+
+Resulting Query:
+Tour.find({ price: { $gte: 500 } })
+  .sort('price')
+  .select('name price')
+  .skip(5)
+  .limit(5);
+  
+This step-by-step chaining approach dynamically constructs the query and makes it reusable across multiple endpoints. 🚀
+
+
+
+
+
+

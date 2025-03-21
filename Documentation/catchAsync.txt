@@ -1,0 +1,13 @@
+The catchAsync middleware is a higher-order function that wraps an asynchronous 
+function and handles potential errors. Here's how it works:
+
+Flow of Execution with an example of how createTour uses catchAsync to make our code cleaner.
+
+A client sends a POST request to the /api/v1/tours endpoint.
+The Express.js router matches the request to the createTour route handler.
+The catchAsync middleware wraps the asynchronous operation.
+The Tour.create() operation is executed.
+If the operation is successful, the res.status(201).json() sends the response.
+If an error occurs, the catch block in the catchAsync middleware is triggered.
+The error is passed to the next() function, which propagates it to the global error handler.
+The global error handler handles the error, logs it, and sends an appropriate error response to the client.

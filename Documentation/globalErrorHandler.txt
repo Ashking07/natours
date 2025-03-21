@@ -1,0 +1,49 @@
+How Errors Reach the Global Error Handler
+
+In Node.js and Express.js, errors are typically propagated through the middleware stack. 
+Here's a breakdown of how an error can reach the global error handler:
+
+1. Unhandled Errors in Route Handlers:
+Direct Throw: If an error is explicitly thrown within a route handler, it immediately stops the execution of that handler.
+Promise Rejection: If a Promise is rejected within a route handler, the error is passed to the next middleware.
+Asynchronous Errors: Errors from asynchronous operations 
+(e.g., database queries, file operations) can also propagate to the next middleware.
+
+2. Middleware Errors:
+Errors that occur within middleware functions, such as custom middleware or built-in middleware like bodyParser, 
+can also be thrown or rejected from Promises.
+
+3. Uncaught Exceptions:
+Any uncaught exception, whether in a route handler, middleware, or elsewhere in the application, 
+can trigger the Node.js event loop's uncaughtException event. This event can be handled to gracefully 
+terminate the process or log the error.
+
+The Role of the next() Function:
+The next() function is used to pass control to the next middleware function in the stack.
+If an error occurs within a middleware function, you can call next(err) to pass the error to the next middleware.
+The Global Error Handler as the Last Resort:
+
+If an error reaches the end of the middleware stack without being handled, it is passed to the global error handler.
+The global error handler is typically registered as the last middleware function in the application.
+Example:
+
+JavaScript
+app.get('/users/:id', (req, res, next) => {
+    const userId = req.params.id;
+
+    // Simulate an error
+    if (userId === 'invalid') {
+        const error = new Error('Invalid user ID');
+        next(error); // Pass the error to the next middleware
+    }
+
+    // ... other logic ...
+});
+
+app.use(globalErrorHandler); // Global error handler as the last middleware
+In this example, if the userId is invalid, an Error object is created and passed to the next() function. 
+This error will eventually reach the globalErrorHandler and be handled appropriately.
+
+By understanding how errors propagate through the middleware stack, you can effectively design your error 
+handling strategy to ensure that your application gracefully handles unexpected errors and provides informative 
+error messages to the user.

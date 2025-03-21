@@ -1,0 +1,16 @@
+Summary
+The password check happens first to verify the user's identity.
+Only after the password is verified is the JWT issued.
+The token serves as a proof of authentication for subsequent requests; it eliminates the need for verifying the 
+password repeatedly.
+Subsequent Requests with JWT
+Once logged in, the client sends the JWT with every request to protected routes. The server then:
+
+Validates the JWT:
+Decodes the token and verifies its signature using the secret key.
+Extracts the user's ID from the payload.
+
+Authenticates the User:
+If the token is valid, the server retrieves the user's information (e.g., from the database) using the ID in the token.
+
+This process eliminates the need to repeatedly check the password after the initial login.
