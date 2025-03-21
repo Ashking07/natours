@@ -18,6 +18,7 @@ const reviewRouter = require('./routes/reviewRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
 const viewRouter = require('./routes/viewRoutes');
 
+//Starts express app
 const app = express();
 
 // Use CORS with default settings (allows all origins)
