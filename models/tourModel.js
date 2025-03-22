@@ -191,11 +191,11 @@ tourSchema.pre(/^find/, function(next) {
   next();
 });
 
-tourSchema.post(/^find/, function(docs, next) {
-  console.log(`Query took ${(Date.now() - this.start) / 1000} seconds!`);
-  // console.log(docs);
-  next();
-});
+// tourSchema.post(/^find/, function(docs, next) {
+//   console.log(`Query took ${(Date.now() - this.start) / 1000} seconds!`);
+//   // console.log(docs);
+//   next();
+// });
 
 //Commented below midlewear as geo spatial middlewear needs to be the first one in the stack to be working
 // // AGGREGATION MIDDLEWEAR
@@ -215,7 +215,7 @@ tourSchema.pre('aggregate', function(next) {
   // Add $match stage for other aggregation pipelines
   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
 
-  console.log(this.pipeline());
+  // console.log(this.pipeline());
   next();
 });
 
