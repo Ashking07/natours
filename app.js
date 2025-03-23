@@ -1,3 +1,8 @@
+//Whenever we make any changes to this project, first we need to add, commit, and push any changes to our git repo,
+// then from the Heroku dashboard, we manually deploy our repo again on 'https://dashboard.heroku.com/apps/natours-ashwin/deploy/github' (Deployment from heroku CLI didn't worked by me, therefore deployed manually by dashboard)
+
+//To access heroku from CLI, run heroku login, then log in to your acc, then run heroku open to open our app
+
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
@@ -25,14 +30,25 @@ const app = express();
 
 app.enable('trust proxy');
 
-// Use CORS with default settings (allows all origins)
-app.use(cors());
-
 //In express, pug templates are called views as in MVC -below we are setting up pug engine
 app.set('view engine', 'pug'); //specifies the directory where the application will look for view templates, ensuring that the template engine knows where to find and render them.
 app.set('views', path.join(__dirname, 'views'));
 
 // 1) GLOBAL MIDDLEWARES
+
+//Implement cors - to be able to give access to our api resourses for other api's/websites to consume
+app.use(cors());
+//Access-Control-Allow-Origin * (Allow all origins to access our api)(Only works for simple req, such as GET and POST)
+// e.g if our api is on api.natours.com and front-end on natours.com, then by doing below we enable our front-end only to be able to access our api
+// app.use(
+//   cors({
+//     origin: 'https://www.natours.com'
+//   })
+// );
+
+//For non-simple req - allowing pre-flight phrase for any origin
+app.options('*', cors());
+//app.options('/api/v1/tours/:id',cors())
 
 //Inbuilt MiddleWear to serve static files of our project
 //By simply requesting the URL "http://127.0.0.1:3000/overview.html" in browser, we'll get served our overview.html static file
