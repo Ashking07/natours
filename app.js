@@ -23,6 +23,7 @@ const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
+const bookingController = require('./controllers/bookingController');
 const viewRouter = require('./routes/viewRoutes');
 
 //Starts express app
@@ -201,6 +202,13 @@ const limiter = rateLimit({
   message: 'Too many request from this IP, please try again in an hour!'
 });
 app.use('/api', limiter);
+
+//We need to put this before parsing the body into json, because stripe needs it to be a stream(raw) and not json data
+app.post(
+  '/webhook-checkout',
+  express.raw({ type: 'application/json' }),
+  bookingController.webhookCheckout
+);
 
 //Body parser, reading data from body into req.body
 app.use(
