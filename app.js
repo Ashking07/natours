@@ -23,6 +23,8 @@ const viewRouter = require('./routes/viewRoutes');
 //Starts express app
 const app = express();
 
+app.enable('trust proxy');
+
 // Use CORS with default settings (allows all origins)
 app.use(cors());
 

@@ -13,17 +13,16 @@ const signToken = id => {
   });
 };
 
-const createSendToke = (user, statusCode, res) => {
+const createSendToke = (user, statusCode, req, res) => {
   const token = signToken(user._id);
-  const cookieOptions = {
+
+  res.cookie('jwt', token, {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
-    httpOnly: true //So that cookie cannot be accessed/modified by any browser. Prevents cross site scripting attacks
-  };
-
-  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
-  res.cookie('jwt', token, cookieOptions);
+    httpOnly: true, //So that cookie cannot be accessed/modified by any browser. Prevents cross site scripting attacks
+    secure: req.secure || req.headers['x-forwarded-proto'] === 'https' //This is how we check if our app is secure or not when using heroku
+  });
 
   //Remove password from output
   user.password = undefined;
@@ -56,7 +55,7 @@ exports.signUp = catchAsync(async (req, res, next) => {
   await new Email(newUser, url).sendWelcome();
 
   //Here, the ._id is the id provided by mongoDB automatically
-  createSendToke(newUser, 201, res);
+  createSendToke(newUser, 201, req, res);
   // const token = signToken(newUser._id);
 
   // res.status(201).json({
@@ -103,7 +102,7 @@ exports.login = catchAsync(async (req, res, next) => {
   }
 
   // 3) If everything ok, send token to client
-  createSendToke(user, 200, res);
+  createSendToke(user, 200, req, res);
 });
 
 // exports.logout = (req, res) => {
@@ -315,7 +314,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   //3)update changedPasswordAt property for the user
 
   //4)Log the user in, send JWT
-  createSendToke(user, 200, res);
+  createSendToke(user, 200, req, res);
 });
 
 //Allowing user to modify/update password without him needing to go though all of the forget/reset password process
@@ -338,7 +337,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   await user.save(); //We need to validate, therefore we don't use User.findByIdAndUpdate
 
   //4) Log user in, send JWT
-  createSendToke(user, 200, res);
+  createSendToke(user, 200, req, res);
 });
 
 //NOTE: when there's anything regarding users or passwords updating in the documents in DB, we always use .save() method
