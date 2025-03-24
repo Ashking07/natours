@@ -91,15 +91,15 @@ const createBookingCheckout = async session => {
     const tour = session.client_reference_id;
     const user = (await User.findOne({ email: session.customer_email })).id;
 
-    if (!session.display_items || session.display_items.length === 0) {
+    if (!session.amount_total) {
       console.error(
-        'session.display_items is missing or empty. session object: ',
+        'session.amount_total is missing. session object: ',
         session
       );
       return; // Exit the function to prevent further errors
     }
 
-    const price = session.display_items[0].amount / 100;
+    const price = session.amount_total / 100; // Price in dollars
     await Booking.create({ tour, user, price });
   } catch (err) {
     console.error('Error creating booking:', err);
@@ -126,7 +126,6 @@ exports.webhookCheckout = (req, res, next) => {
 
   res.status(200).json({ received: true });
 };
-
 exports.createBooking = factory.createOne(Booking);
 exports.getBooking = factory.getOne(Booking);
 exports.getAllBooking = factory.getAll(Booking);
