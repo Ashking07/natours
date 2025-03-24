@@ -68,11 +68,11 @@ const createBookingCheckout = async session => {
   try {
     const tour = session.client_reference_id;
     const user = (await User.findOne({ email: session.customer_email })).id;
-    if (!session.display_items || session.display_items.length === 0) {
-      console.error('session.display_items is missing or empty');
+    if (!session.line_items || session.line_items.length === 0) {
+      console.error('session.line_items is missing or empty');
       return; // Exit the function to prevent further errors
     }
-    const price = session.display_items[0].amount / 100;
+    const price = session.line_items[0].amount / 100;
     await Booking.create({ tour, user, price });
   } catch (err) {
     console.error('Error creating booking:', err);
