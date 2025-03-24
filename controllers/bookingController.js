@@ -58,18 +58,52 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
 //   res.redirect(req.originalUrl.split('?')[0]);
 // });
 
+// const createBookingCheckout = async session => {
+//   const tour = session.client_reference_id;
+//   const user = (await User.findOne({ email: session.customer_email })).id; //clever trick
+//   const price = session.display_items[0].amount / 100;
+//   await Booking.create({ tour, user, price });
+// };
 const createBookingCheckout = async session => {
-  const tour = session.client_reference_id;
-  const user = (await User.findOne({ email: session.customer_email })).id; //clever trick
-  const price = session.display_items[0].amount / 100;
-  await Booking.create({ tour, user, price });
+  try {
+    const tour = session.client_reference_id;
+    const user = (await User.findOne({ email: session.customer_email })).id;
+    if (!session.display_items || session.display_items.length === 0) {
+      console.error('session.display_items is missing or empty');
+      return; // Exit the function to prevent further errors
+    }
+    const price = session.display_items[0].amount / 100;
+    await Booking.create({ tour, user, price });
+  } catch (err) {
+    console.error('Error creating booking:', err);
+  }
 };
+
+// exports.webhookCheckout = (req, res, next) => {
+//   const signature = req.headers['stripe-signature'];
+
+//   let event;
+//   //Below the req.body needs to be in the raw form (in stream form)
+//   try {
+//     event = stripe.webhooks.constructEvent(
+//       req.body,
+//       signature,
+//       process.env.STRIPE_WEBHOOK_SECRET
+//     );
+//   } catch (err) {
+//     return res.status(400).send(`Webhook error: ${err.message}`);
+//   }
+
+//   if (event.type === 'checkout.session.completed')
+//     createBookingCheckout(event.data.object);
+
+//   res.status(200).json({ received: true });
+// };
 
 exports.webhookCheckout = (req, res, next) => {
   const signature = req.headers['stripe-signature'];
 
   let event;
-  //Below the req.body needs to be in the raw form (in stream form)
   try {
     event = stripe.webhooks.constructEvent(
       req.body,
@@ -80,8 +114,9 @@ exports.webhookCheckout = (req, res, next) => {
     return res.status(400).send(`Webhook error: ${err.message}`);
   }
 
-  if (event.type === 'checkout.session.completed')
+  if (event.type === 'checkout.session.completed') {
     createBookingCheckout(event.data.object);
+  }
 
   res.status(200).json({ received: true });
 };
