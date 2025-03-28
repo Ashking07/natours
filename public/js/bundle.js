@@ -12724,11 +12724,11 @@ var signUp = exports.signUp = /*#__PURE__*/function () {
         case 6:
           data = _context.sent;
           if (data.status === 'success') {
-            alert('Signup successful!');
+            (0, _alerts.showAlert)('success', 'Signup successful! 🎉');
             window.location.href = '/me'; // Redirect after signup
           } else {
             console.error(data);
-            alert(data.message);
+            (0, _alerts.showAlert)(data.message);
           }
           _context.next = 13;
           break;

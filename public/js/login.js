@@ -15,11 +15,11 @@ export const signUp = async userData => {
 
     const data = await res.json();
     if (data.status === 'success') {
-      alert('Signup successful!');
+      showAlert('success', 'Signup successful! 🎉');
       window.location.href = '/me'; // Redirect after signup
     } else {
       console.error(data);
-      alert(data.message);
+      showAlert(data.message);
     }
   } catch (err) {
     console.error('Signup failed:', err);
