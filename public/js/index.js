@@ -4,7 +4,7 @@
 /* eslint-disable */
 import '@babel/polyfill';
 import { displayMap } from './mapbox';
-import { login, logout } from './login';
+import { login, logout, signUp } from './login';
 import { updateSettings } from './updateSettings';
 import { bookTour } from './stripe';
 import { showAlert } from './alerts';
@@ -13,6 +13,7 @@ import { showAlert } from './alerts';
 const mapBox = document.getElementById('map');
 const loginForm = document.querySelector('.form--login');
 const logOutBtn = document.querySelector('.nav__el--logout');
+const signUpForm = document.querySelector('.form--signUp');
 const userDataForm = document.querySelector('.form-user-data');
 const userPasswordForm = document.querySelector('.form-user-password');
 const bookBtn = document.getElementById('book-tour');
@@ -32,6 +33,22 @@ if (loginForm)
   });
 
 if (logOutBtn) logOutBtn.addEventListener('click', logout);
+
+if (signUpForm) {
+  signUpForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    console.log('Success'); // Check if event listener is triggered
+
+    // Extract values from input fields
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const passwordConfirm = document.getElementById('passwordConfirm').value;
+
+    // Call signUp function with the correct data
+    signUp({ name, email, password, passwordConfirm });
+  });
+}
 
 if (userDataForm)
   userDataForm.addEventListener('submit', e => {

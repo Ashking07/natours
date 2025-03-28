@@ -4,6 +4,28 @@
 import axios from 'axios';
 import { showAlert } from './alerts';
 
+// signUp function
+export const signUp = async userData => {
+  try {
+    const res = await fetch('/api/v1/users/signUp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData)
+    });
+
+    const data = await res.json();
+    if (data.status === 'success') {
+      alert('Signup successful!');
+      window.location.href = '/me'; // Redirect after signup
+    } else {
+      console.error(data);
+      alert(data.message);
+    }
+  } catch (err) {
+    console.error('Signup failed:', err);
+  }
+};
+
 export const login = async (email, password) => {
   try {
     const res = await axios({
@@ -32,7 +54,10 @@ export const logout = async () => {
       method: 'GET',
       url: '/api/v1/users/logout'
     });
-    if ((res.data.status = 'success')) location.reload(true);
+    if ((res.data.status = 'success'))
+      window.setTimeout(() => {
+        location.assign('/');
+      }, 1500);
   } catch (err) {
     showAlert('error', 'Error logging out! Try again.');
   }
