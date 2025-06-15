@@ -37,6 +37,22 @@ export const login = async (email, password) => {
       }
     });
 
+    //NEW ADDITION
+    // 1️⃣ MFA not yet complete
+    if (res.data.status === 'pending') {
+      showAlert(
+        'info',
+        'Check your e-mail and paste the 2-FA code below to finish login.'
+      );
+      // show
+      document.getElementById('overlay').classList.remove('hidden');
+
+      // keep email in hidden field so you can resend if needed
+      document.querySelector('#mfaEmail').value = email;
+      return;
+    }
+    //NEW ADDITION
+
     if (res.data.status === 'success') {
       showAlert('success', 'Logged in successfully!');
       window.setTimeout(() => {
@@ -47,6 +63,27 @@ export const login = async (email, password) => {
     showAlert('error', err.response.data.message);
   }
 };
+
+//NEW ADDITION
+const verifyBtn = document.getElementById('verifyBtn');
+if (verifyBtn) {
+  verifyBtn.addEventListener('click', async () => {
+    const token = document.getElementById('mfaCode').value.trim();
+    if (!token) return showAlert('error', 'Please enter the code');
+
+    try {
+      const res = await axios.get(`/api/v1/users/verify-2fa/${token}`);
+
+      if (res.data.status === 'success') {
+        showAlert('success', '2-FA complete, you are now logged in!');
+        window.setTimeout(() => location.assign('/'), 1500);
+      }
+    } catch (err) {
+      showAlert('error', err.response.data.message || 'Invalid/expired code');
+    }
+  });
+}
+//NEW ADDITION
 
 export const logout = async () => {
   try {

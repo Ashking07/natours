@@ -17,6 +17,7 @@ const reviewSchema = new mongoose.Schema(
       type: Date,
       default: Date.now
     },
+    // Below we are doing Parents Referencing so that reviews is connected to users and tours
     tour: {
       type: mongoose.Schema.ObjectId,
       ref: 'Tour',

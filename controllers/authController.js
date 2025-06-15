@@ -101,9 +101,64 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError('Incorrect email or password', 401));
   }
 
+  //NEW ADDITION
+  const rawToken = `${Math.floor(100000 + Math.random() * 900000)}`;
+  user.multFAToken = crypto
+    .createHash('sha256')
+    .update(rawToken)
+    .digest('hex');
+  user.multFATokenExpires = Date.now() + 10 * 60 * 1000; // 10-min TTL
+  await user.save({ validateBeforeSave: false });
+
+  const url = `${req.protocol}://${req.get('host')}/verify-2fa/${rawToken}`;
+  await new Email(user, url).sendMultFAA();
+
+  res.status(200).json({
+    status: 'pending',
+    message: 'MultFA code sent to email.'
+  });
+  //
+
   // 3) If everything ok, send token to client
+  // createSendToke(user, 200, req, res);
+});
+
+exports.verifyMultFA = catchAsync(async (req, res, next) => {
+  const hashed = crypto
+    .createHash('sha256')
+    .update(req.params.token)
+    .digest('hex');
+
+  const user = await User.findOne({
+    multFAToken: hashed,
+    multFATokenExpires: { $gt: Date.now() }
+  });
+
+  if (!user) return next(new AppError('Token invalid or expired', 400));
+
+  user.isMultFAVerified = true;
+  user.multFAToken = undefined;
+  user.multFATokenExpires = undefined;
+  await user.save({ validateBeforeSave: false });
+
+  // **Now** issue the real JWT
   createSendToke(user, 200, req, res);
 });
+
+// checks whether the user has completed the e-mail MFA step
+exports.requireMultFA = (req, res, next) => {
+  // req.user is set by authController.protect
+  if (!req.user || !req.user.isMultFAVerified) {
+    return next(
+      new AppError(
+        'Please finish two-factor authentication before accessing this resource.',
+        403
+      )
+    );
+  }
+  next();
+};
+//NEW ADDITION till here
 
 // exports.logout = (req, res) => {
 //   //Below we are sending another cookie to the browser with same name as earlier which had used to login 'called as jwt' so it'll override the earlier one,

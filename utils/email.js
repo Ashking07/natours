@@ -42,6 +42,7 @@ module.exports = class Email {
     const html = pug.renderFile(`${__dirname}/../views/email/${template}.pug`, {
       firstName: this.firstName,
       url: this.url,
+      token: this.url.split('/').pop(), //NEW ADDITION
       subject
     });
 
@@ -69,4 +70,10 @@ module.exports = class Email {
       'Your password reset token (Valid for only 10 minutes!)'
     );
   }
+
+  //NEW ADDITION
+  async sendMultFAA() {
+    await this.send('multFAA', 'Your 2-Factor-Authentication token');
+  }
+  //
 };

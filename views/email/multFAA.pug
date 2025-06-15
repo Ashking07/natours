@@ -1,0 +1,11 @@
+extends baseEmail 
+
+block content
+  p Hi #{firstName},
+  p Trying to login? Use this code to complete 2-FA: <strong>#{token}</strong>
+  p (Copy-paste into the login form; link expires in 10 minutes.)
+  p (Website for this action not yet implemented)
+  
+  p If you didn't initiated this login, kindly log out of all accounts and change your password asap!
+
+//- NEW ADDITION - ENTIRE FILE 

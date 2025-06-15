@@ -1,0 +1,16 @@
+div#overlay.hidden(
+  style='position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:9998;')
+  .overlay__center(
+    style='height:100%;display:flex;justify-content:center;align-items:center;')
+    .mfa-modal(
+      style='background:#fff;border-radius:6px;padding:2.4rem 3rem;width:100%;max-width:32rem;box-shadow:0 1.2rem 3rem rgba(0,0,0,.25);')
+      h3(style='margin-bottom:1.6rem') Enter your 2-FA code
+      input#mfaCode(
+        type='text'
+        placeholder='6-digit code'
+        required
+        style='width:100%;margin-bottom:1.2rem')
+      button#verifyBtn.btn.btn--green(style='width:100%') Verify
+
+
+//- NEW ADDITION - ENTIRE FILE 

@@ -9,6 +9,9 @@ router.post('/signup', authController.signUp);
 router.post('/login', authController.login);
 router.get('/logout', authController.logout);
 
+// 🔑 2-FA verification (still unauthenticated) // NEW ADDITION
+router.get('/verify-2fa/:token', authController.verifyMultFA);
+
 router.post('/forgotPassword', authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);
 

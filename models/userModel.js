@@ -43,6 +43,12 @@ const userSchema = new mongoose.Schema({
       message: 'Passwords are not the same.'
     }
   },
+  //NEW ADDITION
+  multFAToken: String,
+  multFATokenExpires: Date,
+  isMultFAVerified: { type: Boolean, default: false },
+  //
+
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,

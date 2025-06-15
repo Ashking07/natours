@@ -1,0 +1,114 @@
+Below is a “wire-trace” of every hop—front-end to back-end and back—for the new e-mail-based 2-Factor-Auth you’ve bolted onto Natours. Follow the numbers from top to bottom; each bullet names the exact file and function that fires.
+
+0 Pre-reqs (done)
+File	                                  Addition
+models/User.js	                        multFAToken, multFATokenExpires, isMultFAVerified fields
+views/includes/mfaModal.pug	            Hidden modal HTML
+views/layout.pug (or each page)	        include includes/mfaModal
+public/js/login.js (or new mfa.js)	    Login POST + 2-FA modal listener
+controllers/authController.js	          login, verifyMultFA, requireMultFA
+routes/userRoutes.js	                  router.get('/verify-2fa/:token', authController.verifyMultFA);
+email/multFAA.pug	                      E-mail template
+utils/email.js	                        sendMultFAA() method
+
+File → public/js/login.js
+
+login(email, password)  // POST /api/v1/users/login
+Response from server:
+{ status: 'pending' }
+
+→ JS removes hidden from #overlay to display the modal.
+
+2 Back-end receives POST /login
+2.1 Verify password
+controllers/authController.js → login
+
+const user = await User.findOne({ email }).select('+password');
+
+2.2 Create & store 2-FA token
+const rawToken = crypto.randomBytes(32).toString('hex');
+user.multFAToken = sha256(rawToken);
+user.multFATokenExpires = Date.now() + 10*60*1000; // 10 min
+await user.save({ validateBeforeSave: false });
+
+2.3 Send e-mail
+const url = `${req.protocol}://${req.get('host')}/verify-2fa/${rawToken}`;
+await new Email(user, url).sendMultFAA();
+
+2.4 Respond without JWT
+res.status(200).json({ status: 'pending' });
+
+3 E-mail preparation
+utils/email.js → sendMultFAA()
+
+Renders views/email/multFAA.pug
+
+Passes firstName and token (already sliced)
+
+SMTP out via SendGrid / Mailtrap
+
+4 User enters code in modal and clicks Verify
+public/js/login.js
+
+document.getElementById('verifyBtn')
+  .addEventListener('click', async () => {
+     const token = document.getElementById('mfaCode').value.trim();
+     axios.get(`/api/v1/users/verify-2fa/${token}`)
+  });
+
+5 Back-end handles GET /verify-2fa/:token
+controllers/authController.js → verifyMultFA
+
+Hash req.params.token, find user with
+
+multFAToken: hashed, multFATokenExpires: { $gt: Date.now() }
+Mark success
+
+user.isMultFAVerified = true;
+user.multFAToken     = undefined;
+user.multFATokenExpires = undefined;
+await user.save({ validateBeforeSave: false });
+Now call createSendToken(user, …) → sets jwt cookie.
+
+Respond { status: 'success' }
+
+6 Front-end finalises
+In the same modal listener:
+
+if (res.data.status === 'success') {
+  showAlert('success', '2-FA complete!');
+  setTimeout(() => location.assign('/'), 1500);
+}
+Modal re-hides; browser receives JWT cookie → user logged in.
+
+7 Protect sensitive API routes
+routes/tourRoutes.js (example)
+
+
+router.patch('/:id',
+  authController.protect,      // checks JWT
+  authController.requireMultFA,// checks isMultFAVerified
+  authController.restrictTo('admin','lead-guide'),
+  tourController.updateTour);
+requireMultFA = simple middleware:
+
+
+exports.requireMultFA = (req, res, next) => {
+  if (!req.user?.isMultFAVerified)
+    return next(new AppError('Finish 2-FA first', 403));
+  next();
+};
+
+
+File-by-file role summary
+File	Role
+public/js/login.js	Send credentials; pop modal; verify token
+views/includes/mfaModal.pug	Hidden 2-FA input UI
+email/multFAA.pug	E-mail body (displays token)
+utils/email.js	Transport & template render
+controllers/authController.js	login (generate token), verifyMultFA (validate), requireMultFA
+models/User.js	Stores hashed token & flags
+routes/userRoutes.js	Route definitions for login & verify
+*routes/Routes.js	Add protect + requireMultFA on protected endpoints
+
+Follow this chain and you’ll know where every byte travels—from initial password check to final JWT cookie after the second factor is verified.

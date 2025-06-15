@@ -29,7 +29,14 @@ const viewRouter = require('./routes/viewRoutes');
 //Starts express app
 const app = express();
 
-app.enable('trust proxy');
+// app.enable('trust proxy');
+// NEW ADDITION
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1); // 👍 for Heroku / reverse proxy
+} else {
+  app.set('trust proxy', false); // 👈 no proxy in dev
+}
+//NEW ADDITION
 
 //In express, pug templates are called views as in MVC -below we are setting up pug engine
 app.set('view engine', 'pug'); //specifies the directory where the application will look for view templates, ensuring that the template engine knows where to find and render them.
@@ -270,6 +277,14 @@ app.all('*', (req, res, next) => {
   //doing this will skip all other middlewear and directly go to the error handling middlewear
   next(new AppError(`Cant't find ${req.originalUrl} on this server!`, 404));
 });
+
+// NEW ADDITION
+// app.js (attach once, near your global error handler for dev)
+app.use((err, req, res, next) => {
+  console.error('STACK →', err);
+  next(err); // let your existing globalErrorHandler format the response
+});
+// NEW ADDITION
 
 //By specifying 4 parameters, express automatically identifies it's a error handling middlewear
 //Next, you use app.use(globalErrorHandler); to register this middleware with your Express application.
